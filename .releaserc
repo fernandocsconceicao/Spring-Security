@@ -1,0 +1,19 @@
+{
+  "branches": ["master"],
+  "plugins": [
+    "@semantic-release/commit-analyzer", {
+      "preset": "angular",
+      "releaseRules": [
+        {"type": "refactor", "release": "minor"},
+        {"scope": "no-release", "release": false}
+      ],
+    },
+    "@semantic-release/release-notes-generator",
+    "@semantic-release/github",
+      ["@semantic-release/git", {
+      "assets": ["pom.xml"],
+      "message": "chore(release): Update to ${nextRelease.version}"
+    }],
+    "@conveyal/maven-semantic-release"
+  ]
+}

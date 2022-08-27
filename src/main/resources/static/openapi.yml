@@ -1,0 +1,184 @@
+openapi: 3.0.1
+info:
+  title: |
+    @name@
+  description: |
+    ## Description
+    @description@
+    
+    ## More information
+    
+    Access the H2 console at: [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
+    * **Saved Settings**: Generic H2 (Embedded)
+    * **Setting Name**: Generic H2 (Embedded)
+    
+    
+    * **Driver Class**: org.h2.Driver
+    * **JDBC Url**: jdbc:h2:mem:test
+    * **User Name**: sa
+    * **Password**: password
+    
+    Users available for testing:
+    * admin/pass
+    * user/pass
+  version: |
+    @version@
+tags:
+  - name: Actuator
+    description: |
+      Monitor and interact
+    externalDocs:
+      description: Spring Boot Actuator Web API Documentation
+      url: https://docs.spring.io/spring-boot/docs/current/actuator-api/html/
+  - name: User management
+    description: Manage users
+paths:
+  /actuator/health:
+    get:
+      operationId: health
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Not Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+      summary: Actuator web endpoint 'health'
+      tags:
+        - Actuator
+  /users:
+    post:
+      operationId: createUser
+      summary: Create a new user
+      security:
+        - BasicAuth: [ ]
+      tags:
+        - User management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUserRequestDto'
+        required: true
+      responses:
+        '201':
+          description: Created
+        '404':
+          description: Not Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+  /users/all:
+    get:
+      operationId: findAllUsers
+      security:
+        - BasicAuth: [ ]
+      responses:
+        '200':
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponseDto'
+          description: OK
+        '404':
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+          description: Not Found
+      tags:
+        - User management
+  /users/count:
+    get:
+      operationId: getNumberOfUsers
+      responses:
+        '200':
+          content:
+            'application/text':
+              schema:
+                type: integer
+                format: int32
+          description: OK
+        '404':
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+          description: Not Found
+      tags:
+        - User management
+  /users/email/{email}:
+    get:
+      operationId: findUserByEmail
+      security:
+        - BasicAuth: [ ]
+      parameters:
+        - in: path
+          name: email
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UserResponseDto'
+          description: OK
+        '404':
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+          description: Not Found
+      tags:
+        - User management
+components:
+  schemas:
+    ErrorResponseDto:
+      type: object
+      properties:
+        error:
+          type: string
+    NewUserRequestDto:
+      type: object
+      properties:
+        email:
+          type: string
+        enabled:
+          type: boolean
+        password:
+          maxLength: 20
+          minLength: 6
+          type: string
+        username:
+          maxLength: 20
+          minLength: 3
+          type: string
+      required:
+        - email
+        - enabled
+        - password
+        - username
+    UserResponseDto:
+      type: object
+      properties:
+        email:
+          type: string
+        enabled:
+          type: boolean
+        username:
+          type: string
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
